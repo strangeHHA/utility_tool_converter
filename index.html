@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 80%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    textarea {
+      width: 45%;
+      height: 300px;
+      margin: 10px;
+      font-size: 14px;
+      padding: 10px;
+    }
+
+    .inputs {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    select, button {
+      margin: 20px 10px;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Code Converter</h1>
+
+    <div class="inputs">
+      <textarea id="inputCode" placeholder="Paste your YAML or JSON code here..."></textarea>
+      <textarea id="outputCode" placeholder="Converted code will appear here..." readonly></textarea>
+    </div>
+
+    <select id="conversionType">
+      <option value="yaml_to_json">YAML to JSON</option>
+      <option value="json_to_plain">JSON to Plain Text</option>
+    </select>
+
+    <button id="convertButton">Convert</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script> <!-- For YAML Parsing -->
+  <script>
+    document.getElementById('convertButton').addEventListener('click', () => {
+      const inputCode = document.getElementById('inputCode').value;
+      const conversionType = document.getElementById('conversionType').value;
+
+      if (!inputCode.trim()) {
+        alert('Please provide input code.');
+        return;
+      }
+
+      try {
+        let outputCode = '';
+
+        if (conversionType === 'yaml_to_json') {
+          // Convert YAML to JSON with single quotes
+          const yamlData = jsyaml.load(inputCode);  // Using js-yaml library
+          outputCode = JSON.stringify(yamlData, null, 2).replace(/"/g, "'"); // Replace double quotes with single quotes
+        } else if (conversionType === 'json_to_plain') {
+          // Convert JSON to plain text (AWS Secret Manager format)
+          const singleQuoteJson = inputCode.replace(/'/g, '"');  // Ensure single quotes are converted to double quotes
+          const jsonData = JSON.parse(singleQuoteJson);
+          outputCode = JSON.stringify(jsonData).replace(/"/g, "'"); // Convert it back to string with single quotes
+        }
+
+        document.getElementById('outputCode').value = outputCode;
+      } catch (error) {
+        alert('Error during conversion: ' + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
